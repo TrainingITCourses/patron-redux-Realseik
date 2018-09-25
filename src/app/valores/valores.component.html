@@ -1,0 +1,6 @@
+<select class="select-valores" (change)="seleccionado($event)">
+  <option disabled selected value>
+  <option *ngFor="let valor of valoresCriterio" [value]="valor.id">
+    <span>{{valor.name}}</span>
+  </option>
+</select>
