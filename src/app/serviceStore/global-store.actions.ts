@@ -3,7 +3,8 @@ export enum GlobalActionTypes {
   LoadStatuses = '[Global] LoadStatuses',
   LoadTypes = '[Global] LoadTypes',
   LoadAgencies = '[Global] LoadAgencies',
-  LoadCriterios = '[Global] LoadCriterios'
+  LoadCriterios = '[Global] LoadCriterios',
+  LoadValores = '[Global] LoadValores'
 }
 
 export interface Action {
@@ -36,5 +37,10 @@ export class LoadCriterios implements Action {
   constructor(public readonly payload: any[]) { }
 }
 
+export class LoadValores implements Action {
+  public readonly type = GlobalActionTypes.LoadValores;
+  constructor(public readonly payload: any[]) { }
+}
+
 export type GlobalActions = LoadLaunches | LoadStatuses |
-  LoadTypes | LoadAgencies | LoadCriterios;
+  LoadTypes | LoadAgencies | LoadCriterios | LoadValores;

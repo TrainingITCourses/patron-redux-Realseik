@@ -4,6 +4,7 @@ export interface Global {
     agencies: any[];
     launches: any[];
     criterios: string[];
+    valores: any[];
 }
 
 export const globalInitialState: Global = {
@@ -12,4 +13,5 @@ export const globalInitialState: Global = {
     agencies: [],
     launches: [],
     criterios: ['Estado', 'Agencia', 'Tipo'],
+    valores: []
 };
