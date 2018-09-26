@@ -5,6 +5,7 @@ import {
   OnInit,
   ChangeDetectorRef
 } from '@angular/core';
+import { StoreService, GlobalSlideTypes } from '../serviceStore/global-store.service';
 
 @Component({
   selector: 'app-container',
@@ -18,10 +19,16 @@ export class ContainerComponent implements OnInit {
   public lanzamientos = [];
   private criterio: string;
 
-  constructor(private data: DataService, private cdRef: ChangeDetectorRef) { }
+  constructor(private data: DataService,
+    private global: StoreService,
+    private cdRef: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.iniciar();
+    // HOLA
+    // Aqui debo suscribirme al observable de VALORES, que no lo tengo creado
+    // de este modo cada vez que se seleccione un criterio, se cambia el estado
+    // con los nuevos valores, y saltaria el next aqui.
   }
 
   iniciar() {
@@ -31,18 +38,18 @@ export class ContainerComponent implements OnInit {
 
   onCriterioSeleccionado(criterio) {
     this.criterio = criterio;
-    this.data.leerValoresCriterio(criterio).subscribe(res => {
-      this.valores = res;
-      // Un cambio de criterio debe limpiar los lanzamientos; hay que repintar los 2 componentes hijo
-      this.lanzamientos = [];
-      this.cdRef.detectChanges();
-    });
+    this.data.leerValoresCriterio(criterio);
+    // this.data.leerValoresCriterio(criterio).subscribe(res => {
+    //   this.valores = res;
+    //   this.lanzamientos = [];
+    //   this.cdRef.detectChanges();
+    // });
   }
 
   onValorSeleccionado(valorCriterio) {
     this.data.leerLanzamientos(this.criterio, valorCriterio).subscribe(res => {
       this.lanzamientos = res;
-    //  this.cdRef.detectChanges();
+      //  this.cdRef.detectChanges();
     });
   }
 }

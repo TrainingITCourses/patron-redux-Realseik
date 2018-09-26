@@ -1,7 +1,10 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, pipe } from "rxjs";
-import { map, tap } from "rxjs/operators";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { StoreService, GlobalSlideTypes } from "../serviceStore/global-store.service";
+import { URL } from '../shared/config';
+import { GlobalActionTypes, GlobalActions, LoadStatuses, LoadLaunches, LoadAgencies } from "../serviceStore/global-store.actions";
 
 @Injectable()
 export class DataService {
@@ -10,36 +13,51 @@ export class DataService {
   public estados: any[];
 
   // Fijos
-  private url = "http://localhost:4200";
-  private criterios = ["Estado", "Agencia", "Tipo"];
   public lanzamientos: any[];
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private global: StoreService) { }
 
   public getCriterios() {
-    return this.criterios;
+    // Como es 'fijo', tan solo necesitariamos una snapshot.
+    return this.global.selectSnapShot(GlobalSlideTypes.criterios);
   }
 
-  public leerValoresCriterio(name): Observable<any[]> {
+  public leerValoresCriterio(name) {
+    // const localLaunches = localStorage.getItem(this.key);
+    // if (localLaunches) {
+    //   this.global.dispatch(new LoadLaunches(JSON.parse(localLaunches)));
+    // } else {
+    //   this.http
+    //     .get(this.url)
+    //     .pipe(map((res: any) => res.launches))
+    //     .subscribe(launches => {
+    //       localStorage.setItem(this.key, JSON.stringify(launches));
+    //       this.global.dispatch(new LoadLaunches(launches));
+    //     });
+    // }
+
     switch (name) {
-      case "Estado":
-        return this.getEstados();
-      case "Agencia":
-        return this.getAgencias();
-      case "Tipo":
-        return this.getMisiones();
+      case 'Estado':
+        this.getEstados();
+        break;
+      case 'Agencia':
+        this.getAgencias();
+        break;
+      case 'Tipo':
+        this.getMisiones();
+        break;
     }
   }
 
   public leerLanzamientos(criterio, valor): Observable<any[]> {
-    return this.http.get(this.url + "/assets/launchlibrary.json").pipe(
+    return this.http.get(URL + '/assets/launchlibrary.json').pipe(
       map((res: any) =>
         res.launches.filter(launch => {
           switch (criterio) {
-            case "Agencia":
+            case 'Agencia':
               return this.filtrarAgencia(launch, Number(valor));
-            case "Estado":
+            case 'Estado':
               return this.filtrarEstado(launch, Number(valor));
-            case "Tipo":
+            case 'Tipo':
               return this.filtrarTipoMision(launch, Number(valor));
           }
         })
@@ -62,26 +80,27 @@ export class DataService {
     return lanzamiento.status === valor;
   }
 
-  private getAgencias(): Observable<any[]> {
+  private getAgencias() {
     return this.http
-      .get(this.url + "/assets/launchagencies.json")
-      .pipe(map((res: any) => res.agencies));
+      .get(URL + '/assets/launchagencies.json')
+      .pipe(map((res: any) => {
+        this.global.dispatch(new LoadAgencies(res.agencies));
+      }));
   }
 
   private getMisiones(): Observable<any> {
-    var i = console.log;
-    i("hola");
-    return this.http.get(this.url + "/assets/launchmissions.json").pipe(
+    return this.http.get(URL + '/assets/launchmissions.json').pipe(
       map((res: any) => {
-        return res.types;
+        this.global.dispatch(new LoadLaunches(res.types));
       })
     );
   }
 
-  private getEstados(): Observable<any[]> {
-    return this.http.get(this.url + "/assets/launchstatus.json").pipe(
-      map((res: any) => res.types)
-      // tap((res: any[]) => (this.estados = res))
+  private getEstados() {
+    this.http.get(URL + '/assets/launchstatus.json').pipe(
+      map((res: any) => {
+        this.global.dispatch(new LoadStatuses(res.types));
+      })
     );
   }
 }
