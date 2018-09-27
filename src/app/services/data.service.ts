@@ -1,79 +1,59 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
-import {
-  StoreService,
-  GlobalSlideTypes
-} from "../serviceStore/global-store.service";
-import { URL } from "../shared/config";
-import {
-  GlobalActionTypes,
-  GlobalActions,
-  LoadStatuses,
-  LoadLaunches,
-  LoadAgencies,
-  LoadValores
-} from "../serviceStore/global-store.actions";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { StoreService, GlobalSlideTypes } from '../serviceStore/global-store.service';
+import { URL } from '../shared/config';
+import { LoadStatuses, LoadLaunches, LoadAgencies, LoadTypes } from '../serviceStore/global-store.actions';
 
 @Injectable()
 export class DataService {
-  public agencias: any[];
-  public misiones: any[];
-  public estados: any[];
+  constructor(private http: HttpClient, private global: StoreService) { }
 
-  // Fijos
-  public lanzamientos: any[];
-  constructor(private http: HttpClient, private global: StoreService) {}
-
-  public getCriterios() {
-    // Como es 'fijo', tan solo necesitariamos una snapshot.
-    return this.global.selectSnapShot(GlobalSlideTypes.criterios);
-  }
+  // ---------    Funciones generales
 
   public leerValoresCriterio(name) {
     switch (name) {
-      case "Estado":
+      case 'Estado':
         this.getEstados();
         break;
-      case "Agencia":
+      case 'Agencia':
         this.getAgencias();
         break;
-      case "Tipo":
-        this.getMisiones();
+      case 'Tipo':
+        this.getTipos();
         break;
     }
   }
 
   public leerLanzamientos(criterio, valor) {
-    this.http.get(URL + "/assets/launchlibrary.json").pipe(
+    this.http.get(URL + '/assets/launchlibrary.json').pipe(
       map((res: any) =>
-        this.global.dispatch(
-          new LoadValores(
-            res.launches.filter(launch => {
-              switch (criterio) {
-                case "Agencia":
-                  return this.filtrarAgencia(launch, Number(valor));
-                case "Estado":
-                  return this.filtrarEstado(launch, Number(valor));
-                case "Tipo":
-                  return this.filtrarTipoMision(launch, Number(valor));
-              }
-            })
-          )
-        )
+        res.launches.filter(launch => {
+          switch (criterio) {
+            case 'Agencia':
+              return this.filtrarAgencia(launch, Number(valor));
+            case 'Estado':
+              return this.filtrarEstado(launch, Number(valor));
+            case 'Tipo':
+              return this.filtrarTipoMision(launch, Number(valor));
+          }
+        })
       )
-    );
+    ).subscribe((lanzamientos: any) => {
+      this.global.dispatch(new LoadLaunches(lanzamientos));
+    });
   }
+
+  // ---------   Filtros a aplicar en la lista de lanzamientos
 
   private filtrarAgencia(lanzamiento: any, valor: number): boolean {
     if (lanzamiento.lsp) {
-      return lanzamiento.lsp.id == valor;
+      return lanzamiento.lsp.id === valor;
     }
   }
   private filtrarTipoMision(lanzamiento: any, valor: number): boolean {
     if (lanzamiento.missions.length > 0) {
-      return lanzamiento.missions[0].type == valor;
+      return lanzamiento.missions[0].type === valor;
     }
   }
 
@@ -81,28 +61,55 @@ export class DataService {
     return lanzamiento.status === valor;
   }
 
-  private getAgencias() {
-    return this.http.get(URL + "/assets/launchagencies.json").pipe(
-      map((res: any) => {
-        this.global.dispatch(new LoadAgencies(res.agencies));
-      })
-    );
+  // ---------   GETS
+
+  public getCriterios() {
+    // Para hacerlo diferente voy a tratarlo como algo 'fijo', asique tan solo necesitariamos una snapshot.
+    return this.global.selectSnapShot(GlobalSlideTypes.criterios);
   }
 
-  private getMisiones(): Observable<any> {
-    return this.http.get(URL + "/assets/launchmissions.json").pipe(
-      map((res: any) => {
-        this.global.dispatch(new LoadLaunches(res.types));
-      })
-    );
+  private getAgencias() {
+    const Agencies = this.global.selectSnapShot(GlobalSlideTypes.agencies);
+    if (Agencies.length > 0) {
+      return [...Agencies];
+    } else {
+      this.http.get(URL + '/assets/launchagencies.json').pipe(
+        map((res: any) => {
+          return res.agencies;
+        })
+      ).subscribe((agencies: any) => {
+        this.global.dispatch(new LoadAgencies(agencies));
+      });
+    }
+  }
+
+  private getTipos() {
+    const Types = this.global.selectSnapShot(GlobalSlideTypes.types);
+    if (Types.length > 0) {
+      return [...Types];
+    } else {
+      this.http.get(URL + '/assets/launchmissions.json').pipe(
+        map((res: any) => {
+          this.global.dispatch(new LoadTypes(res.types));
+        })
+      ).subscribe((types: any) => {
+        this.global.dispatch(new LoadTypes(types));
+      });
+    }
   }
 
   private getEstados() {
-    this.http.get(URL + "/assets/launchstatus.json").pipe(
-      map((res: any) => {
-        console.log(res);
-        this.global.dispatch(new LoadStatuses(res.types));
-      })
-    );
+    const States = this.global.selectSnapShot(GlobalSlideTypes.statuses);
+    if (States.length > 0) {
+      return [...States];
+    } else {
+      this.http.get(URL + '/assets/launchstatus.json').pipe(
+        map((res: any) => {
+          return res.types;
+        })
+      ).subscribe((states: any) => {
+        this.global.dispatch(new LoadStatuses(states));
+      });
+    }
   }
 }

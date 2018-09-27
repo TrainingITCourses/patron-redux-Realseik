@@ -21,7 +21,6 @@ export class BuscadorComponent implements OnInit {
   @Input()
   public valoresCriterio = [];
 
-  // Outputs
   @Output()
   criterioSeleccionado = new EventEmitter<string>();
   @Output()

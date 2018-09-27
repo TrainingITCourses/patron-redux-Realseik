@@ -8,15 +8,15 @@ import { GlobalActions, GlobalActionTypes } from "./global-store.actions";
   providedIn: "root"
 })
 export class StoreService {
-  private state = { ...globalInitialState };
-  private launches$ = new BehaviorSubject<any>(this.state.launches);
-  private statuses$ = new BehaviorSubject<any>(this.state.statuses);
-  private types$ = new BehaviorSubject<any>(this.state.types);
-  private agencies$ = new BehaviorSubject<any>(this.state.agencies);
-  private criterios$ = new BehaviorSubject<any>(this.state.criterios);
-  private valores$ = new BehaviorSubject<any>(this.state.valores);
+  private store = { ...globalInitialState };
+  private launches$ = new BehaviorSubject<any>(this.store.launches);
+  private statuses$ = new BehaviorSubject<any>(this.store.statuses);
+  private types$ = new BehaviorSubject<any>(this.store.types);
+  private agencies$ = new BehaviorSubject<any>(this.store.agencies);
+  private criterios$ = new BehaviorSubject<any>(this.store.criterios);
+  private valores$ = new BehaviorSubject<any>(this.store.valores);
 
-  constructor() {}
+  constructor() { }
 
   public select$(slice: GlobalSlideTypes) {
     switch (slice) {
@@ -38,48 +38,50 @@ export class StoreService {
   public selectSnapShot = (slice: GlobalSlideTypes) => {
     switch (slice) {
       case GlobalSlideTypes.launches:
-        return [...this.state.launches];
+        return [...this.store.launches];
       case GlobalSlideTypes.statuses:
-        return [...this.state.statuses];
+        return [...this.store.statuses];
       case GlobalSlideTypes.types:
-        return [...this.state.types];
+        return [...this.store.types];
       case GlobalSlideTypes.agencies:
-        return [...this.state.agencies];
+        return [...this.store.agencies];
       case GlobalSlideTypes.criterios:
-        return [...this.state.criterios];
+        return [...this.store.criterios];
       case GlobalSlideTypes.valores:
-        return [...this.state.valores];
+        return [...this.store.valores];
     }
-  };
+  }
 
   public dispatch = (action: GlobalActions) => {
-    console.log("dispatching...", action);
-    this.state = globalStoreReducer(this.state, action);
+    this.store = globalStoreReducer(this.store, action);
     switch (action.type) {
       case GlobalActionTypes.LoadLaunches:
-        this.launches$.next([...this.state.launches]);
+        this.launches$.next([...this.store.launches]);
         break;
       case GlobalActionTypes.LoadStatuses:
-        this.statuses$.next([...this.state.statuses]);
+        this.valores$.next([...this.store.statuses]);
+        // this.statuses$.next([...this.state.statuses]); ¿Se podria emitir por 2 observables si fuera necesario o es una mala practica?
         break;
       case GlobalActionTypes.LoadTypes:
-        this.types$.next([...this.state.types]);
+        this.valores$.next([...this.store.types]);
+        // this.types$.next([...this.state.types]);
         break;
       case GlobalActionTypes.LoadAgencies:
-        this.agencies$.next([...this.state.agencies]);
+        this.valores$.next([...this.store.agencies]);
+        // this.agencies$.next([...this.state.agencies]);
         break;
       case GlobalActionTypes.LoadValores:
-        this.valores$.next([...this.state.valores]);
+        this.valores$.next([...this.store.valores]);
         break;
     }
-  };
+  }
 }
 
 export enum GlobalSlideTypes {
-  launches = "launches",
-  statuses = "statuses",
-  types = "types",
-  agencies = "agencies",
-  criterios = "criterios",
-  valores = "valores"
+  launches = 'launches',
+  statuses = 'statuses',
+  types = 'types',
+  agencies = 'agencies',
+  criterios = 'criterios',
+  valores = 'valores'
 }

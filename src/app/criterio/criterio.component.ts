@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, OnInit, Input, EventEmitter, Output
   selector: 'app-criterio',
   templateUrl: './criterio.component.html',
   styleUrls: ['./criterio.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush  
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CriterioComponent implements OnInit {
 
@@ -18,7 +18,6 @@ export class CriterioComponent implements OnInit {
   }
 
   seleccionado(evt) {
-    console.log(evt.currentTarget.value);
-    this.criterioSeleccionado.emit(evt.currentTarget.value);    
+    this.criterioSeleccionado.emit(evt.currentTarget.value);
   }
 }

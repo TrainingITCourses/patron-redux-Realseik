@@ -23,8 +23,4 @@ export class LanzamientosComponent implements OnInit {
     this.lanzamientos = [];
   }
 
-  get runChangeDetection() {
-    console.log('Checking the view');
-    return true;
-  }
 }
